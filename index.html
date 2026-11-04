@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>تسجيل الدخول</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Amiri:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{
+  --ink:#0f2a24;
+  --ink-2:#1b3d34;
+  --paper:#fbf7ee;
+  --line:#d9d0bb;
+  --brass:#b8872f;
+  --wine:#7a2e2e;
+  --muted:#6b6a5e;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+button{outline:none}
+button:focus-visible,a:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+html,body{height:100%}
+body{
+  font-family:'Cairo',Tahoma,Arial,sans-serif;
+  background:var(--ink);color:var(--ink);
+  display:flex;flex-direction:column;justify-content:flex-end;align-items:center;
+  overflow:hidden;
+}
+
+/* الفيديو: يظهر كامل بدون قص */
+.bg-video{
+  position:fixed;inset:0;width:100%;height:100%;
+  object-fit:contain;object-position:center top;
+  background:var(--ink);z-index:0;
+}
+
+/* الصندوق */
+.card{
+  position:relative;z-index:3;
+  width:100%;max-width:460px;
+  max-height:92dvh;overflow-y:auto;
+  background:var(--paper);
+  border-radius:28px 28px 0 0;
+  padding:24px 22px calc(22px + env(safe-area-inset-bottom));
+}
+.head{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.head img{width:64px;height:64px;object-fit:contain;flex:none}
+.head .txt{text-align:right}
+.head h1{font-size:1.35rem;font-weight:800;line-height:1.3}
+.head .sub{color:var(--muted);font-size:.9rem}
+
+.field{position:relative;margin-bottom:12px}
+.field>i.lead{position:absolute;top:50%;right:15px;transform:translateY(-50%);color:var(--ink-2);font-size:1rem;pointer-events:none}
+.field input{
+  width:100%;height:52px;
+  border:1.5px solid var(--line);border-radius:14px;
+  background:#fff;color:var(--ink);
+  font:inherit;font-size:1rem;
+  direction:rtl;text-align:right;
+  padding:0 46px 0 46px;
+  outline:none;transition:border-color .15s;
+}
+.field input::placeholder{color:#9a9684;text-align:right}
+.field input:focus{border-color:var(--ink)}
+.field.err input{border-color:var(--wine)}
+.eye{
+  position:absolute;top:50%;left:6px;transform:translateY(-50%);
+  width:40px;height:40px;border:0;background:none;cursor:pointer;
+  color:var(--ink-2);font-size:1rem;border-radius:10px;
+  display:grid;place-items:center;touch-action:none;
+}
+.msg{font-size:.85rem;color:var(--wine);margin:2px 4px 8px}
+.msg:empty{display:none}
+.field.tight{margin-bottom:8px}
+
+.row{display:flex;justify-content:space-between;align-items:center;font-size:.9rem;margin:0 2px 14px}
+.remember{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.remember input{appearance:none;-webkit-appearance:none;width:20px;height:20px;border:1.5px solid var(--ink-2);border-radius:6px;background:#fff;display:grid;place-items:center;cursor:pointer}
+.remember input:checked{background:var(--ink)}
+.remember input:checked::after{content:"\f00c";font-family:"Font Awesome 6 Free";font-weight:900;color:var(--paper);font-size:.7rem}
+a,.linkbtn{color:var(--ink);font-weight:700;text-decoration:none;background:none;border:0;font:inherit;font-weight:700;cursor:pointer}
+a:hover,.linkbtn:hover{color:var(--brass)}
+
+.btn{
+  width:100%;height:52px;border:0;border-radius:14px;cursor:pointer;
+  background:var(--ink);color:var(--paper);font:inherit;font-size:1.05rem;font-weight:700;
+  transition:background .15s;
+}
+.btn:hover{background:var(--ink-2)}
+.btn:disabled{opacity:.6;cursor:default}
+
+.divider{display:flex;align-items:center;gap:12px;margin:18px 0 14px;color:var(--muted);font-size:.9rem}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.social{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.social button{
+  height:50px;border:1.5px solid var(--line);border-radius:14px;background:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  font:inherit;font-weight:600;color:var(--ink);transition:border-color .15s;
+}
+.social button:hover{border-color:var(--ink)}
+.social button:active{background:#f3efe4}
+.social button:disabled{opacity:1;cursor:default}
+.ico{display:grid;place-items:center;width:22px;height:22px}
+.spin{width:18px;height:18px;border:2.5px solid var(--line);border-top-color:var(--ink);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.social .fa-facebook-f{color:#1877f2;font-size:1.15rem}
+.social svg{width:20px;height:20px}
+
+.signup{text-align:center;margin-top:16px;font-size:.92rem;color:var(--muted)}
+
+/* OTP */
+.modal{position:fixed;inset:0;z-index:10;background:rgba(15,42,36,.7);display:none;align-items:flex-end;justify-content:center}
+.modal.open{display:flex}
+.sheet{width:100%;max-width:460px;background:var(--paper);border-radius:28px 28px 0 0;padding:24px 22px calc(24px + env(safe-area-inset-bottom));position:relative}
+.sheet h2{font-size:1.25rem;text-align:center;margin-bottom:4px}
+.sheet p.sub{text-align:center;color:var(--muted);font-size:.9rem;margin-bottom:16px}
+.close{position:absolute;top:14px;left:14px;width:36px;height:36px;border:0;background:none;font-size:1.1rem;color:var(--ink-2);cursor:pointer}
+.otp{display:flex;gap:8px;justify-content:center;direction:ltr;margin-bottom:12px}
+.otp input{width:46px;height:54px;text-align:center;font:inherit;font-size:1.3rem;font-weight:700;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);outline:none}
+.otp input:focus{border-color:var(--ink)}
+.hidden{display:none}
+.center{text-align:center;margin-top:12px;font-size:.9rem;color:var(--muted)}
+
+@media (max-height:700px){.card{padding-top:18px}.field input,.btn{height:46px}.head{margin-bottom:14px}}
+@media (max-width:360px){.otp input{width:40px}}
+
+/* ===== شاشة البداية (Splash) ===== */
+.splash{position:fixed;inset:0;z-index:100;background:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.stage{position:relative;width:200px;height:176px}
+.tile{position:absolute;inset:0;display:grid;place-items:center;opacity:0}
+.tile img{width:100%;height:100%;object-fit:contain}
+.sname{font-family:'Amiri','Cairo',serif;font-size:2.3rem;line-height:1.3;color:var(--ink);margin-top:28px;opacity:0}
+.rule{width:56px;height:2px;background:var(--brass);margin-top:12px;transform:scaleX(0)}
+.stag{color:var(--muted);font-size:.95rem;margin-top:12px;opacity:0}
+</style>
+</head>
+<body>
+
+<!-- شاشة البداية: غيّر الاسم والعبارة من هنا -->
+<div class="splash" id="splash">
+  <div class="stage">
+    <div class="tile"><img src="assets/logo.png" alt=""></div>
+  </div>
+  <div class="sname" id="siteName">اسم الموقع</div>
+  <div class="rule"></div>
+  <div class="stag" id="siteTag">أكبر مكتبة كتب</div>
+</div>
+
+<!-- حط الفيديو بتاعك هنا -->
+<video class="bg-video" autoplay muted loop playsinline preload="auto">
+  <source src="assets/video.mp4" type="video/mp4">
+</video>
+
+<main class="card">
+  <div class="head">
+    <img src="assets/logo.png" alt="الشعار">
+    <div class="txt">
+      <h1 id="title">أهلاً بعودتك</h1>
+      <p class="sub" id="subtitle">سجّل دخولك وكمّل قراءتك</p>
+    </div>
+  </div>
+
+  <!-- ===== تسجيل الدخول ===== -->
+  <section id="loginPanel">
+    <form id="loginForm" novalidate>
+      <div class="field" id="fId">
+        <i class="fa-solid fa-user lead"></i>
+        <input type="text" id="identifier" name="username" placeholder="البريد الإلكتروني أو رقم الهاتف" autocomplete="username" autocapitalize="none" spellcheck="false">
+      </div>
+      <div class="field tight" id="fPw">
+        <i class="fa-solid fa-lock lead"></i>
+        <input type="password" id="password" name="password" placeholder="كلمة السر" autocomplete="current-password" maxlength="128">
+        <button type="button" class="eye" id="eye" aria-label="إخفاء كلمة السر"><i class="fa-solid fa-eye"></i></button>
+      </div>
+      <div class="msg" id="loginMsg" role="alert"></div>
+      <div class="row">
+        <label class="remember"><input type="checkbox" id="remember"> ذكّرني</label>
+        <button type="button" class="linkbtn" id="forgotBtn">نسيت كلمة السر؟</button>
+      </div>
+      <button class="btn" type="submit" id="loginBtn">تسجيل الدخول</button>
+    </form>
+    <div class="divider">أو سجّل عبر</div>
+    <div class="social">
+      <button type="button" class="gbtn"><span class="ico"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg></span> جوجل</button>
+      <button type="button" class="fbtn"><span class="ico"><i class="fa-brands fa-facebook-f"></i></span> فيسبوك</button>
+    </div>
+    <p class="signup">ليس لديك حساب؟ <a href="#signup" id="toSignup">إنشاء حساب</a></p>
+  </section>
+
+  <!-- ===== إنشاء حساب ===== -->
+  <section id="signupPanel" class="hidden">
+    <form id="signupForm" novalidate>
+      <div class="field" id="sfName">
+        <i class="fa-solid fa-user lead"></i>
+        <input type="text" id="s_name" name="name" placeholder="الاسم الكامل" autocomplete="name" maxlength="60">
+      </div>
+      <div class="field" id="sfId">
+        <i class="fa-solid fa-envelope lead"></i>
+        <input type="text" id="s_identifier" name="username" placeholder="البريد الإلكتروني أو رقم الهاتف" autocomplete="username" autocapitalize="none" spellcheck="false">
+      </div>
+      <div class="field" id="sfPw">
+        <i class="fa-solid fa-lock lead"></i>
+        <input type="password" id="s_password" name="new-password" placeholder="كلمة السر" autocomplete="new-password" maxlength="128">
+        <button type="button" class="eye" id="s_eye" aria-label="إخفاء كلمة السر"><i class="fa-solid fa-eye"></i></button>
+      </div>
+      <div class="msg" id="signMsg" role="alert"></div>
+      <button class="btn" type="submit" id="signBtn">إنشاء الحساب</button>
+    </form>
+    <div class="divider">أو سجّل عبر</div>
+    <div class="social">
+      <button type="button" class="gbtn"><span class="ico"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg></span> جوجل</button>
+      <button type="button" class="fbtn"><span class="ico"><i class="fa-brands fa-facebook-f"></i></span> فيسبوك</button>
+    </div>
+    <p class="signup">لديك حساب؟ <a href="#login" id="toLogin">تسجيل الدخول</a></p>
+  </section>
+
+  <!-- ===== رمز التحقق (إنشاء حساب / جوجل / فيسبوك) ===== -->
+  <section id="otpPanel" class="hidden">
+    <div class="otp" id="sotpBoxes">
+      <input inputmode="numeric" maxlength="1" autocomplete="one-time-code">
+      <input inputmode="numeric" maxlength="1">
+      <input inputmode="numeric" maxlength="1">
+      <input inputmode="numeric" maxlength="1">
+      <input inputmode="numeric" maxlength="1">
+      <input inputmode="numeric" maxlength="1">
+    </div>
+    <div class="msg" id="sotpMsg" role="alert" style="text-align:center"></div>
+    <button class="btn" id="sVerify">تأكيد</button>
+    <p class="center"><span id="sTimer"></span> <button class="linkbtn hidden" id="sResend">إعادة الإرسال</button></p>
+    <p class="center"><button class="linkbtn" id="sBack">رجوع</button></p>
+  </section>
+</main>
+
+<!-- نسيت كلمة السر / OTP -->
+<div class="modal" id="otpModal">
+  <div class="sheet">
+    <button class="close" id="closeModal" aria-label="إغلاق"><i class="fa-solid fa-xmark"></i></button>
+
+    <div id="step1">
+      <h2>استعادة كلمة السر</h2>
+      <p class="sub">اكتب البريد أو رقم الهاتف المسجّل وهنبعتلك رمز التحقق</p>
+      <div class="field">
+        <i class="fa-solid fa-user lead"></i>
+        <input type="text" id="otpId" placeholder="البريد الإلكتروني أو رقم الهاتف" autocapitalize="none" spellcheck="false">
+      </div>
+      <div class="msg" id="msg1" role="alert"></div>
+      <button class="btn" id="sendOtp">إرسال الرمز</button>
+    </div>
+
+    <div id="step2" class="hidden">
+      <h2>أدخل رمز التحقق</h2>
+      <p class="sub" id="otpTo"></p>
+      <div class="otp" id="otpBoxes">
+        <input inputmode="numeric" maxlength="1" autocomplete="one-time-code">
+        <input inputmode="numeric" maxlength="1">
+        <input inputmode="numeric" maxlength="1">
+        <input inputmode="numeric" maxlength="1">
+        <input inputmode="numeric" maxlength="1">
+        <input inputmode="numeric" maxlength="1">
+      </div>
+      <div class="msg" id="msg2" role="alert" style="text-align:center"></div>
+      <button class="btn" id="verifyOtp">تأكيد</button>
+      <p class="center"><span id="timer"></span> <button class="linkbtn hidden" id="resend">إعادة الإرسال</button></p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+/* ===== حركة البداية بـ GSAP ===== */
+(function(){
+  'use strict';
+  const SPLASH_ONCE_PER_SESSION = true;   // false: تظهر في كل فتح للصفحة
+  const splash = document.getElementById('splash');
+  const flag = (st, k) => { try{ return st.getItem(k); }catch(_){ return null; } };
+  const hasSession = (() => { try{ return Object.keys(localStorage).some(k => /^sb-.+-auth-token$/.test(k)); }catch(_){ return false; } })();
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if(!window.gsap || reduce || hasSession || (SPLASH_ONCE_PER_SESSION && flag(sessionStorage,'splash_seen') === '1')){
+    splash.remove(); return;
+  }
+  try{ sessionStorage.setItem('splash_seen','1'); }catch(_){}
+
+  const $q = s => document.querySelector(s), $a = s => document.querySelectorAll(s);
+  const card = $q('.card');
+  const items = $a('.card .head, .card .field, .card .row, .card .btn, .card .divider, .card .social, .card .signup');
+
+  gsap.set(card, { yPercent: 100 });
+  gsap.set(items, { opacity: 0, y: 14 });
+  gsap.set('.bg-video', { opacity: 0 });
+  gsap.set('.tile', { scale: .8, y: 12 });
+  gsap.set('.sname', { y: 18, filter: 'blur(8px)' });
+  gsap.set('.stag', { y: 10 });
+
+  const finish = () => {
+    splash.remove();
+    gsap.set([card, items, '.bg-video'], { clearProps: 'all' });
+  };
+
+  const tl = gsap.timeline({ defaults: { ease: 'power2.out' }, onComplete: finish });
+  tl.to('.tile',  { opacity: 1, scale: 1, y: 0, duration: 1.1, ease: 'power3.out' }, .2)
+    .to('.sname', { opacity: 1, y: 0, filter: 'blur(0px)', duration: .8 }, 1.1)
+    .to('.rule',  { scaleX: 1, duration: .7, ease: 'power3.out' }, 1.3)
+    .to('.stag',  { opacity: 1, y: 0, duration: .7 }, 1.5)
+    .addLabel('zoom', 3.2)
+    .to('.sname, .stag, .rule', { opacity: 0, duration: .35 }, 'zoom')
+    .to('.tile',  { scale: 6, opacity: 0, duration: .9, ease: 'power3.in' }, 'zoom')
+    .to(splash,   { opacity: 0, duration: .6, ease: 'power1.in' }, 'zoom+=.45')
+    .to('.bg-video', { opacity: 1, duration: 1 }, 'zoom+=.5')
+    .to(card,     { yPercent: 0, duration: .9, ease: 'power3.out' }, 'zoom+=.6')
+    .to(items,    { opacity: 1, y: 0, duration: .55, stagger: .07 }, 'zoom+=.85');
+})();
+</script>
+
+<!-- نسخة ثابتة من Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+(function(){
+  'use strict';
+  const $ = id => document.getElementById(id);
+
+  /* ================= الإعدادات ================= */
+  const SUPABASE_URL      = 'https://YOUR-PROJECT.supabase.co';
+  const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';   // anon فقط. ممنوع service_role
+  const HOME_PAGE  = 'home.html';
+  const RESET_PAGE = 'reset-password.html';
+  const DEFAULT_COUNTRY_CODE = '+20';
+  const SHOW_PASSWORD_BY_DEFAULT = true;       // لمسة على العين تبدّل
+  const MAX_FAILS = 5, LOCK_SECONDS = 60;
+
+  const configured = !SUPABASE_URL.includes('YOUR-PROJECT');
+
+  /* تخزين الجلسة: ذكّرني مفعّلة → localStorage، غير كده → sessionStorage */
+  const wantsRemember = () => { try{ return localStorage.getItem('remember_me') === '1'; }catch(_){ return false; } };
+  const authStore = {
+    getItem(k){ try{ return localStorage.getItem(k) ?? sessionStorage.getItem(k); }catch(_){ return null; } },
+    setItem(k,v){ try{
+      const [on, off] = wantsRemember() ? [localStorage, sessionStorage] : [sessionStorage, localStorage];
+      on.setItem(k,v); off.removeItem(k);
+    }catch(_){ } },
+    removeItem(k){ try{ localStorage.removeItem(k); sessionStorage.removeItem(k); }catch(_){ } }
+  };
+  const sb = configured ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth:{ storage:authStore, persistSession:true, autoRefreshToken:true, detectSessionInUrl:true, flowType:'pkce' }
+  }) : null;
+
+  let going = false, hold = false;
+  const go = url => { if(going) return; going = true; location.replace(url); };
+
+  /* ================= أدوات ================= */
+  const latin = s => s.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+  const isEmail = v => v.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+  function toE164(raw){
+    let v = latin(raw).replace(/[\s\-().]/g, '');
+    if(v.startsWith('00')) v = '+' + v.slice(2);
+    else if(v.startsWith('0')) v = DEFAULT_COUNTRY_CODE + v.slice(1);
+    else if(!v.startsWith('+')) v = DEFAULT_COUNTRY_CODE + v;
+    return /^\+\d{8,15}$/.test(v) ? v : null;
+  }
+  function parseId(raw){
+    const v = raw.trim();
+    if(v.includes('@')) return isEmail(v) ? { email: v.toLowerCase() } : null;
+    const p = toE164(v);
+    return p ? { phone: p } : null;
+  }
+  const strongPw = p => p.length >= 8 && /[A-Za-z\u0600-\u06FF]/.test(p) && /\d/.test(p);
+  const PW_MSG = 'كلمة السر لازم تكون 8 خانات على الأقل وفيها حروف وأرقام';
+  const errText = e => {
+    if(!e) return '';
+    if(e.status === 429) return 'محاولات كتير، استنى شوية وجرّب تاني';
+    if(e.message && /fetch|network/i.test(e.message)) return 'مشكلة في الاتصال، جرّب تاني';
+    return null;
+  };
+  const shakeErr = () => { if(window.gsap) gsap.fromTo('.field.err', { x: -7 }, { x: 0, duration: .55, ease: 'elastic.out(1,.35)', clearProps: 'transform' }); };
+  const needSetup = el => { el.textContent = 'اربط Supabase الأول (SUPABASE_URL و SUPABASE_ANON_KEY)'; };
+
+  /* العين: لمسة واحدة تبدّل */
+  function setupEye(input, btn){
+    let shown = SHOW_PASSWORD_BY_DEFAULT; const ic = btn.firstElementChild;
+    const render = () => {
+      input.type = shown ? 'text' : 'password';
+      ic.className = shown ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash';
+      btn.setAttribute('aria-label', shown ? 'إخفاء كلمة السر' : 'إظهار كلمة السر');
+    };
+    render();
+    btn.addEventListener('mousedown', e => e.preventDefault());
+    btn.addEventListener('click', () => { shown = !shown; render(); });
+  }
+  setupEye($('password'), $('eye'));
+  setupEye($('s_password'), $('s_eye'));
+
+  [['identifier','fId'],['password','fPw'],['s_name','sfName'],['s_identifier','sfId'],['s_password','sfPw']]
+    .forEach(([i,f]) => $(i).addEventListener('input', () => $(f).classList.remove('err')));
+
+  /* خانات الرمز (إدخال + لصق) */
+  function wireBoxes(container){
+    const boxes = [...container.children];
+    boxes.forEach((b, i) => {
+      b.addEventListener('input', () => {
+        b.value = b.value.replace(/\D/g, '').slice(-1);
+        if(b.value && boxes[i+1]) boxes[i+1].focus();
+      });
+      b.addEventListener('keydown', e => { if(e.key === 'Backspace' && !b.value && boxes[i-1]) boxes[i-1].focus(); });
+      b.addEventListener('paste', e => {
+        const t = latin(e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6);
+        if(!t) return; e.preventDefault();
+        [...t].forEach((c, k) => { if(boxes[k]) boxes[k].value = c; });
+        boxes[Math.min(t.length, 5)].focus();
+      });
+    });
+    return boxes;
+  }
+  function makeTimer(tEl, rEl){
+    let h;
+    return {
+      start(){
+        let s = 60; rEl.classList.add('hidden'); tEl.classList.remove('hidden'); clearInterval(h);
+        h = setInterval(() => {
+          tEl.textContent = 'إعادة الإرسال بعد ' + s + ' ث';
+          if(--s < 0){ clearInterval(h); tEl.classList.add('hidden'); rEl.classList.remove('hidden'); }
+        }, 1000);
+      },
+      stop(){ clearInterval(h); }
+    };
+  }
+
+  /* ================= التنقل بين الصفحات بدون إعادة تحميل (الفيديو يفضل شغال) ================= */
+  const views  = { login: $('loginPanel'), signup: $('signupPanel'), otp: $('otpPanel') };
+  const titles = { login: ['أهلاً بعودتك','سجّل دخولك وكمّل قراءتك'], signup: ['إنشاء حساب','انضم وابدأ رحلتك مع الكتب'], otp: ['أدخل رمز التحقق',''] };
+  let current = 'login';
+
+  function showView(name, sub, instant){
+    if(name === current && sub === undefined) return;
+    const from = views[current], to = views[name];
+    const apply = () => {
+      from.classList.add('hidden'); to.classList.remove('hidden');
+      $('title').textContent = titles[name][0];
+      $('subtitle').textContent = sub !== undefined ? sub : titles[name][1];
+      current = name;
+    };
+    if(window.gsap && !instant && from !== to){
+      gsap.to(from, { opacity: 0, y: -8, duration: .18, onComplete: () => {
+        gsap.set(from, { clearProps: 'all' }); apply();
+        gsap.fromTo(to, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: .3, clearProps: 'all' });
+      }});
+    } else apply();
+  }
+  $('toSignup').addEventListener('click', e => { e.preventDefault(); showView('signup'); history.pushState(null, '', '#signup'); });
+  $('toLogin').addEventListener('click',  e => { e.preventDefault(); showView('login');  history.pushState(null, '', location.pathname + location.search); });
+  window.addEventListener('popstate', () => { if(current !== 'otp') showView(location.hash === '#signup' ? 'signup' : 'login'); });
+  if(location.hash === '#signup') showView('signup', undefined, true);
+
+  const activeMsg = () => current === 'signup' ? $('signMsg') : $('loginMsg');
+
+  /* ================= تسجيل الدخول ================= */
+  const pw = $('password');
+  let fails = 0, lockedUntil = 0, lockTimer;
+  $('loginForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const msg = $('loginMsg'), btn = $('loginBtn');
+    $('fId').classList.remove('err'); $('fPw').classList.remove('err'); msg.textContent = '';
+    if(Date.now() < lockedUntil) return;
+
+    const raw = $('identifier').value.trim(), pass = pw.value;
+    if(!raw || !pass){
+      if(!raw) $('fId').classList.add('err');
+      if(!pass) $('fPw').classList.add('err');
+      msg.textContent = (!raw && !pass) ? 'الحقول دي مطلوبة' : 'الحقل ده مطلوب';
+      shakeErr(); return;
+    }
+    const id = parseId(raw);
+    if(!id){ $('fId').classList.add('err'); msg.textContent = 'اكتب بريد إلكتروني أو رقم هاتف صحيح'; shakeErr(); return; }
+    if(!sb){ needSetup(msg); return; }
+
+    try{ localStorage.setItem('remember_me', $('remember').checked ? '1' : '0'); }catch(_){}
+    btn.disabled = true; btn.textContent = 'جارٍ الدخول...';
+    const { error } = await sb.auth.signInWithPassword({ ...id, password: pass });
+    if(error){
+      fails++;
+      msg.textContent = errText(error) || 'البيانات غير صحيحة';
+      $('fPw').classList.add('err'); shakeErr();
+      btn.disabled = false; btn.textContent = 'تسجيل الدخول';
+      if(fails >= MAX_FAILS){
+        lockedUntil = Date.now() + LOCK_SECONDS*1000; fails = 0; btn.disabled = true;
+        clearInterval(lockTimer);
+        lockTimer = setInterval(() => {
+          const left = Math.ceil((lockedUntil - Date.now())/1000);
+          if(left <= 0){ clearInterval(lockTimer); btn.disabled = false; btn.textContent = 'تسجيل الدخول'; msg.textContent = ''; }
+          else btn.textContent = 'حاول بعد ' + left + ' ث';
+        }, 500);
+      }
+      return;
+    }
+    pw.value = '';
+    // الانتقال بيحصل من routeSession (بيشيّك لو لسه محتاج رمز تحقق)
+  });
+
+  /* ================= إنشاء حساب ================= */
+  const sBoxes = wireBoxes($('sotpBoxes'));
+  const sTimer = makeTimer($('sTimer'), $('sResend'));
+  let sTarget = null;   // { email|phone, mode:'signup'|'social' }
+
+  function openOtp(sub){
+    sBoxes.forEach(b => b.value = ''); $('sotpMsg').textContent = ''; $('sVerify').disabled = false;
+    showView('otp', sub); sTimer.start();
+    setTimeout(() => sBoxes[0].focus(), 350);
+  }
+
+  $('signupForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const msg = $('signMsg'), btn = $('signBtn'), spw = $('s_password');
+    ['sfName','sfId','sfPw'].forEach(f => $(f).classList.remove('err')); msg.textContent = '';
+
+    const name = $('s_name').value.trim(), raw = $('s_identifier').value.trim(), pass = spw.value;
+    const missing = [[name,'sfName'],[raw,'sfId'],[pass,'sfPw']].filter(x => !x[0]);
+    if(missing.length){
+      missing.forEach(x => $(x[1]).classList.add('err'));
+      msg.textContent = missing.length > 1 ? 'الحقول دي مطلوبة' : 'الحقل ده مطلوب';
+      shakeErr(); return;
+    }
+    if(name.length < 2){ $('sfName').classList.add('err'); msg.textContent = 'اكتب اسمك كامل'; shakeErr(); return; }
+    const id = parseId(raw);
+    if(!id){ $('sfId').classList.add('err'); msg.textContent = 'اكتب بريد إلكتروني أو رقم هاتف صحيح'; shakeErr(); return; }
+    if(!strongPw(pass)){ $('sfPw').classList.add('err'); msg.textContent = PW_MSG; shakeErr(); return; }
+    if(!sb){ needSetup(msg); return; }
+
+    try{ localStorage.setItem('remember_me', '1'); }catch(_){}
+    btn.disabled = true; btn.textContent = 'جارٍ إنشاء الحساب...';
+    hold = true;
+    const { data, error } = await sb.auth.signUp({ ...id, password: pass, options:{ data:{ full_name: name } } });
+    btn.disabled = false; btn.textContent = 'إنشاء الحساب';
+
+    if(error){
+      hold = false;
+      if(error.code === 'weak_password'){ $('sfPw').classList.add('err'); msg.textContent = PW_MSG; }
+      else msg.textContent = errText(error) || 'تعذّر إنشاء الحساب، راجع البيانات وحاول مرة أخرى';
+      shakeErr(); return;
+    }
+    if(data && data.session){ go(HOME_PAGE); return; }   // لو تأكيد الحساب مقفول في Supabase
+    spw.value = '';
+    sTarget = { ...id, mode:'signup' };
+    openOtp(id.email ? 'أرسلنا رمزًا من 6 أرقام إلى بريدك الإلكتروني' : 'أرسلنا رمزًا من 6 أرقام برسالة على هاتفك');
+  });
+
+  async function sendSocialOtp(email){
+    const { error } = await sb.auth.signInWithOtp({ email, options:{ shouldCreateUser:false } });
+    return error;
+  }
+
+  $('sVerify').onclick = async () => {
+    const msg = $('sotpMsg'), code = sBoxes.map(b => b.value).join('');
+    if(code.length < 6){ msg.textContent = 'اكتب الرمز كامل (6 أرقام)'; return; }
+    if(!sb || !sTarget){ msg.textContent = 'ابدأ من جديد'; return; }
+    $('sVerify').disabled = true; hold = true;
+    let params;
+    if(sTarget.mode === 'social') params = { email: sTarget.email, token: code, type: 'email' };
+    else if(sTarget.email)        params = { email: sTarget.email, token: code, type: 'signup' };
+    else                          params = { phone: sTarget.phone, token: code, type: 'sms' };
+    const { error } = await sb.auth.verifyOtp(params);
+    if(error){ $('sVerify').disabled = false; hold = false; msg.textContent = errText(error) || 'الرمز غير صحيح أو انتهت صلاحيته'; return; }
+    if(sTarget.mode === 'social') await sb.auth.updateUser({ data:{ otp_verified:true } });
+    go(HOME_PAGE);
+  };
+  $('sResend').onclick = async () => {
+    if(!sb || !sTarget) return;
+    let err;
+    if(sTarget.mode === 'social') err = await sendSocialOtp(sTarget.email);
+    else err = (await sb.auth.resend(sTarget.email ? { type:'signup', email:sTarget.email } : { type:'sms', phone:sTarget.phone })).error;
+    $('sotpMsg').textContent = (err && err.status === 429) ? errText(err) : '';
+    sTimer.start();
+  };
+  $('sBack').onclick = async () => {
+    sTimer.stop(); hold = false;
+    if(sTarget && sTarget.mode === 'social' && sb){ await sb.auth.signOut(); socialShown = false; }
+    sTarget = null;
+    showView(location.hash === '#signup' ? 'signup' : 'login');
+  };
+
+  /* ================= جوجل وفيسبوك (في الصفحتين) ================= */
+  const oauthBtns = { google: [...document.querySelectorAll('.gbtn')], facebook: [...document.querySelectorAll('.fbtn')] };
+  const iconHTML = { google: oauthBtns.google[0].querySelector('.ico').innerHTML, facebook: oauthBtns.facebook[0].querySelector('.ico').innerHTML };
+  function oauthBusy(provider, on){
+    Object.keys(oauthBtns).forEach(k => oauthBtns[k].forEach(b => {
+      b.disabled = on;
+      b.querySelector('.ico').innerHTML = (on && k === provider) ? '<span class="spin"></span>' : iconHTML[k];
+    }));
+  }
+  window.addEventListener('pageshow', e => { if(e.persisted) oauthBusy(null, false); });
+  async function oauth(provider){
+    const msg = activeMsg(); msg.textContent = '';
+    if(!sb){ needSetup(msg); return; }
+    try{ localStorage.setItem('remember_me', current === 'login' && !$('remember').checked ? '0' : '1'); }catch(_){}
+    oauthBusy(provider, true);
+    const { error } = await sb.auth.signInWithOAuth({ provider, options:{ redirectTo: new URL('index.html', location.href).href } });
+    if(error){ oauthBusy(null, false); msg.textContent = errText(error) || 'تعذّر تسجيل الدخول، حاول مرة أخرى'; }
+  }
+  oauthBtns.google.forEach(b => b.onclick = () => oauth('google'));
+  oauthBtns.facebook.forEach(b => b.onclick = () => oauth('facebook'));
+
+  /* ======== توجيه الجلسة: حساب جوجل/فيسبوك غير مؤكَّد يطلب رمز تحقق أولًا ======== */
+  let socialShown = false;
+  async function routeSession(session){
+    if(hold || going || !session) return;
+    const u = session.user, prov = u.app_metadata && u.app_metadata.provider;
+    const social = prov && prov !== 'email' && prov !== 'phone';
+    if(social && !(u.user_metadata && u.user_metadata.otp_verified)){
+      if(socialShown) return; socialShown = true;
+      if(!u.email){
+        await sb.auth.signOut(); socialShown = false;
+        activeMsg().textContent = 'الحساب ده مفيهوش بريد إلكتروني. سجّل برقم الهاتف أو ببريد.';
+        return;
+      }
+      sTarget = { email: u.email, mode:'social' };
+      const err = await sendSocialOtp(u.email);
+      openOtp('أرسلنا رمزًا من 6 أرقام إلى ' + u.email);
+      if(err && err.status === 429) $('sotpMsg').textContent = errText(err);
+      return;
+    }
+    go(HOME_PAGE);
+  }
+  if(sb){
+    sb.auth.getSession().then(({ data }) => routeSession(data && data.session));
+    sb.auth.onAuthStateChange((ev, session) => { if(ev === 'SIGNED_IN') setTimeout(() => routeSession(session), 0); });
+  }
+
+  /* ================= نسيت كلمة السر (OTP) ================= */
+  const modal = $('otpModal'), boxes = wireBoxes($('otpBoxes')), fTimer = makeTimer($('timer'), $('resend'));
+  let otpTarget = null;
+  const show = n => { $('step1').classList.toggle('hidden', n!==1); $('step2').classList.toggle('hidden', n!==2); };
+  const openM = () => { show(1); $('msg1').textContent=''; $('otpId').value = $('identifier').value; modal.classList.add('open'); };
+  const closeM = () => { modal.classList.remove('open'); fTimer.stop(); };
+  $('forgotBtn').onclick = openM;
+  $('closeModal').onclick = closeM;
+  modal.addEventListener('mousedown', e => { if(e.target === modal) closeM(); });
+
+  async function sendOtp(){
+    const msg = $('msg1');
+    if(!$('otpId').value.trim()){ msg.textContent = 'الحقل ده مطلوب'; return; }
+    const id = parseId($('otpId').value);
+    if(!id){ msg.textContent = 'اكتب بريد إلكتروني أو رقم هاتف صحيح'; return; }
+    if(!sb){ needSetup(msg); return; }
+    $('sendOtp').disabled = true;
+    const { error } = await sb.auth.signInWithOtp({ ...id, options:{ shouldCreateUser:false } });
+    $('sendOtp').disabled = false;
+    if(error && error.status === 429){ msg.textContent = errText(error); return; }
+    otpTarget = id;   // رد موحّد حتى لو الحساب مش موجود
+    $('otpTo').textContent = 'لو الحساب موجود هيوصله رمز من 6 أرقام';
+    boxes.forEach(b => b.value = ''); $('msg2').textContent = '';
+    show(2); fTimer.start(); boxes[0].focus();
+  }
+  $('sendOtp').onclick = sendOtp;
+  $('resend').onclick = () => { show(1); sendOtp(); };
+
+  $('verifyOtp').onclick = async () => {
+    const msg = $('msg2'), code = boxes.map(b => b.value).join('');
+    if(code.length < 6){ msg.textContent = 'اكتب الرمز كامل (6 أرقام)'; return; }
+    if(!sb || !otpTarget){ msg.textContent = 'ابدأ من جديد'; return; }
+    $('verifyOtp').disabled = true; hold = true;
+    const params = otpTarget.email
+      ? { email: otpTarget.email, token: code, type: 'email' }
+      : { phone: otpTarget.phone, token: code, type: 'sms' };
+    const { error } = await sb.auth.verifyOtp(params);
+    $('verifyOtp').disabled = false;
+    if(error){ hold = false; msg.textContent = errText(error) || 'الرمز غير صحيح أو انتهت صلاحيته'; return; }
+    go(RESET_PAGE);   // هناك: sb.auth.updateUser({ password })
+  };
+})();
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="UTF-8">
+<meta http-equiv="refresh" content="0;url=index.html#signup">
+<title>إنشاء حساب</title></head>
+<body><script>location.replace('index.html#signup');</script></body></html>
